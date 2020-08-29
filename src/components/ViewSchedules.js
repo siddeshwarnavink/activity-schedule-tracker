@@ -5,6 +5,7 @@ import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import MoreVentIcon from '@material-ui/icons/MoreVert';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import { saveAs } from 'file-saver';
 
 import axios from '../firebase-axios';
 import AppContainer from './AppContainer';
@@ -15,6 +16,7 @@ const ViewActivity = props => {
     const [taskList, setTaskList] = React.useState(null);
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [isFavorite, setIsFavorite] = React.useState(false);
+    const [timestamp, setTimestamp] = React.useState(null);
 
     React.useEffect(() => {
         fetchData();
@@ -27,6 +29,7 @@ const ViewActivity = props => {
                 console.log(data);
                 setTaskList(data.list);
                 setIsFavorite(data.isFavorite);
+                setTimestamp(data.timestamp)
             })
     }
 
@@ -41,6 +44,29 @@ const ViewActivity = props => {
             alert('Task deleted!');
             props.history.push('/');
         });
+    }
+
+    const downloadScheduleHandler = () => {
+        let dataStr = '';
+
+        taskList.forEach(task => {
+            dataStr += `
+Time & Place : ${task.placeTime}
+Activity : ${task.activity}
+Executed : [${task.completed ? "x" : ""}]
+Reason if not executed: ${task.reason ? task.reason : "-"}
+==============
+            `
+        })
+
+        const blob = new Blob([`
+Activity schedule for ${timestamp}
+
+==============
+        ${dataStr}
+        `],
+            { type: "text/plain;charset=utf-8" });
+        saveAs(blob, `Activity ${timestamp}.txt`);
     }
 
 
@@ -74,6 +100,7 @@ const ViewActivity = props => {
                             onClose={handleClose}
                         >
                             <MenuItem onClick={deleteScheduleHandler}>Delete</MenuItem>
+                            <MenuItem onClick={downloadScheduleHandler}>Download</MenuItem>
                         </Menu>
                     </React.Fragment>
                 )}
