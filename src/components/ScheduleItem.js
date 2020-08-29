@@ -36,10 +36,11 @@ const useStyles = makeStyles({
 
 const ScheduleItem = props => {
     const classes = useStyles();
-    const [checked, setChecked] = React.useState(props.data.completed || false);
+    // const [checked, setChecked] = React.useState(props.data.completed ? true : false);
     const [reason, setReason] = React.useState(props.data.reason || '');
-
     const [open, setOpen] = React.useState(false);
+
+    const checked = props.data.completed ? true : false;
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -49,17 +50,14 @@ const ScheduleItem = props => {
         setOpen(false);
     };
 
-    const handleChange = (event) => {
-        setChecked(event.target.checked);
-
-        axios.patch(`/schedule/${props.id}/list/${props.index}.json`, { completed: !props.data.completed }).then(() => {
+    const handleChange = () => {
+        axios.patch(`/schedule/${props.id}/list/${props.index}.json`, { completed: !checked }).then(() => {
             props.updateParrent();
         })
     };
 
     const saveReasonHandler = () => {
         handleClose();
-
         axios.patch(`/schedule/${props.id}/list/${props.index}.json`, { reason }).then(() => {
             props.updateParrent();
         })
@@ -120,4 +118,4 @@ const ScheduleItem = props => {
     );
 }
 
-export default ScheduleItem;
+export default React.memo(ScheduleItem);

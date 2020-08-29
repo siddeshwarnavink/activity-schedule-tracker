@@ -112,7 +112,7 @@ const CreateActivity = props => {
         <form onSubmit={onSaveHandler}>
             <AppToolbar
                 isGoBack
-                title="Create Schedule"
+                title={templateMode ? "Update Template" : "Create Schedule"}
                 actions={(
                     <React.Fragment>
                         <IconButton type="submit" edge="start" color="inherit" aria-label="menu">

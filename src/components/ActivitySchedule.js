@@ -65,7 +65,7 @@ const ActivitySchedule = () => {
             />
 
             <AppContainer>
-                <h1 className="hollow-title">Highlighted</h1>
+                <h1 className="hollow-title">Favorite</h1>
                 {schedules && schedules.filter(schedule => schedule.isFavorite).map((data, key) => (
                     <ActivityScheduleItem
                         key={key}

@@ -24,6 +24,7 @@ const ViewActivity = props => {
     }, []);
 
     const fetchData = () => {
+        console.log('fetching data...');
         axios.get(`/schedule/${props.match.params.id}.json`).then(res => res.data)
             .then(data => {
                 console.log(data);
@@ -107,12 +108,12 @@ Activity schedule for ${timestamp}
             />
             <AppContainer>
                 <h1 className="hollow-title">Pending tasks</h1>
-                {taskList && taskList.filter(task => task.isFavorite).map((task, index) => (
+                {taskList && taskList.filter(task => !task.completed).map((task, index) => (
                     <ScheduleItem key={index} index={index} id={props.match.params.id} data={task} updateParrent={fetchData} />
                 ))}
 
                 <h1 className="hollow-title">Completed tasks</h1>
-                {taskList && taskList.filter(task => !task.isFavorite).map((task, index) => (
+                {taskList && taskList.filter(task => task.completed).map((task, index) => (
                     <ScheduleItem key={index} index={index} id={props.match.params.id} data={task} updateParrent={fetchData} />
                 ))}
             </AppContainer>
