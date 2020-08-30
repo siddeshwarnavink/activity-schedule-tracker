@@ -34,20 +34,20 @@ const ActivitySchedule = () => {
     }, []);
 
     const fetchData = () => {
-        axios('/schedule.json')
+        axios('/schedule')
             .then(res => res.data)
             .then(data => {
-                delete data['template'];
+                // delete data['template'];
 
-                let transformedData = []
-                Object.keys(data).forEach(key => {
-                    transformedData.push({
-                        id: key,
-                        ...data[key]
-                    })
+                // let transformedData = []
+                // Object.keys(data).forEach(key => {
+                //     transformedData.push({
+                //         id: key,
+                //         ...data[key]
+                //     })
 
-                });
-                setSchedules(transformedData)
+                // });
+                setSchedules(data)
             });
     }
 

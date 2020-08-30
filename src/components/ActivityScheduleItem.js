@@ -38,7 +38,7 @@ const ActivityScheduleItem = props => {
     };
 
     const toggleFavStateHandler = () => {
-        axios.patch(`/schedule/${props.id}.json`, { isFavorite: !props.isFavorite }).then(() => {
+        axios.patch(`/schedule?id=${props.id}`, { isFavorite: !props.isFavorite }).then(() => {
             alert('Favorite status updated!');
             props.updateParrent();
             handleClose();
@@ -46,7 +46,7 @@ const ActivityScheduleItem = props => {
     }
 
     const deleteScheduleHandler = () => {
-        axios.delete(`/schedule/${props.id}.json`).then(() => {
+        axios.delete(`/schedule?id=${props.id}`).then(() => {
             alert('Task deleted!');
             props.updateParrent();
             handleClose();

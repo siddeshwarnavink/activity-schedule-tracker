@@ -49,13 +49,13 @@ const CreateActivity = props => {
     }, []);
 
     React.useEffect(() => {
-        axios.get('/schedule/template.json')
+        axios.get('/schedule-template')
             .then(res => res.data)
             .then(data => {
                 if (!data) {
                     setScheduleList([{ placeTime: '', activity: '', completed: false }])
                 } else {
-                    setScheduleList(data);
+                    setScheduleList(data.list);
                 }
             })
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -64,14 +64,14 @@ const CreateActivity = props => {
     const onSaveHandler = (event) => {
         event.preventDefault();
         if (templateMode) {
-            axios.put('/schedule/template.json', scheduleList)
+            axios.post('/schedule-template', { list: scheduleList })
                 .then(res => res.data)
                 .then(() => {
                     alert('Template successfully updated!');
                     props.history.push('/')
                 });
         } else {
-            axios.post('/schedule.json', {
+            axios.post('/schedule', {
                 list: scheduleList,
                 timestamp,
                 isFavorite: false

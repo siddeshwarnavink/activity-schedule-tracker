@@ -25,7 +25,7 @@ const ViewActivity = props => {
 
     const fetchData = () => {
         console.log('fetching data...');
-        axios.get(`/schedule/${props.match.params.id}.json`).then(res => res.data)
+        axios.get(`/schedule?id=${props.match.params.id}`).then(res => res.data)
             .then(data => {
                 console.log(data);
                 setTaskList(data.list);
@@ -35,13 +35,13 @@ const ViewActivity = props => {
     }
 
     const toggleFavStateHandler = () => {
-        axios.patch(`/schedule/${props.match.params.id}.json`, { isFavorite: !isFavorite }).then(() => {
+        axios.patch(`/schedule?id=${props.match.params.id}`, { isFavorite: !isFavorite }).then(() => {
             fetchData();
         });
     }
 
     const deleteScheduleHandler = () => {
-        axios.delete(`/schedule/${props.match.params.id}.json`).then(() => {
+        axios.delete(`/schedule?id=${props.match.params.id}`).then(() => {
             alert('Task deleted!');
             props.history.push('/');
         });
@@ -109,12 +109,12 @@ Activity schedule for ${timestamp}
             <AppContainer>
                 <h1 className="hollow-title">Pending tasks</h1>
                 {taskList && taskList.filter(task => !task.completed).map((task, index) => (
-                    <ScheduleItem key={index} index={index} id={props.match.params.id} data={task} updateParrent={fetchData} />
+                    <ScheduleItem key={index} id={task.id} data={task} updateParrent={fetchData} />
                 ))}
 
                 <h1 className="hollow-title">Completed tasks</h1>
                 {taskList && taskList.filter(task => task.completed).map((task, index) => (
-                    <ScheduleItem key={index} index={index} id={props.match.params.id} data={task} updateParrent={fetchData} />
+                    <ScheduleItem key={index} id={task.id} data={task} updateParrent={fetchData} />
                 ))}
             </AppContainer>
         </main>

@@ -51,14 +51,14 @@ const ScheduleItem = props => {
     };
 
     const handleChange = () => {
-        axios.patch(`/schedule/${props.id}/list/${props.index}.json`, { completed: !checked }).then(() => {
+        axios.patch(`/task?id=${props.id}`, { completed: !checked }).then(() => {
             props.updateParrent();
         })
     };
 
     const saveReasonHandler = () => {
         handleClose();
-        axios.patch(`/schedule/${props.id}/list/${props.index}.json`, { reason }).then(() => {
+        axios.patch(`/task?id=${props.id}`, { reason }).then(() => {
             props.updateParrent();
         })
     }
