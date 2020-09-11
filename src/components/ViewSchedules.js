@@ -1,6 +1,7 @@
 import React from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import FavoriteIcon from '@material-ui/icons/Favorite';
+import SentimentAatisfiedAltIcon from '@material-ui/icons/SentimentSatisfiedAlt'
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import MoreVentIcon from '@material-ui/icons/MoreVert';
 import Menu from '@material-ui/core/Menu';
@@ -8,41 +9,58 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { saveAs } from 'file-saver';
 
 import axios from '../firebase-axios';
+import { array_distinct } from '../util';
+import NotificationContext from '../context/notification-context';
 import AppContainer from './AppContainer';
 import AppToolbar from './AppToolbar';
+import AppSpinner from './AppSpinner';
 import ScheduleItem from './ScheduleItem';
+import IsArrayFilled from './IsArrayFilled';
+import Fallback from './Fallback';
+import FailedToFetchFallback from './FailedToFetchFallback';
 
 const ViewActivity = props => {
+    const [loading, setLoading] = React.useState(true);
+    const [error, setError] = React.useState(null);
     const [taskList, setTaskList] = React.useState(null);
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [isFavorite, setIsFavorite] = React.useState(false);
     const [timestamp, setTimestamp] = React.useState(null);
+    const notificationCtx = React.useContext(NotificationContext);
 
-    React.useEffect(() => {
+    const pageInitialLoad = () => {
+        setLoading(true);
         fetchData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }
+
+    React.useEffect(pageInitialLoad, []);
 
     const fetchData = () => {
-        console.log('fetching data...');
         axios.get(`/schedule?id=${props.match.params.id}`).then(res => res.data)
             .then(data => {
-                console.log(data);
                 setTaskList(data.list);
                 setIsFavorite(data.isFavorite);
                 setTimestamp(data.timestamp)
+            })
+            .catch(err => {
+                setError(err);
+            })
+            .finally(() => {
+                setLoading(false);
             })
     }
 
     const toggleFavStateHandler = () => {
         axios.patch(`/schedule?id=${props.match.params.id}`, { isFavorite: !isFavorite }).then(() => {
+            notificationCtx.pushMessage(`Task ${!isFavorite ? "favorited" : "unfavorited"}`, 'success');
             fetchData();
         });
     }
 
     const deleteScheduleHandler = () => {
         axios.delete(`/schedule?id=${props.match.params.id}`).then(() => {
-            alert('Task deleted!');
+            // alert('Task deleted!');
+            notificationCtx.pushMessage('Schedule Deleted', 'info');
             props.history.push('/');
         });
     }
@@ -79,18 +97,51 @@ Activity schedule for ${timestamp}
         setAnchorEl(null);
     };
 
+    const pendingTasks = () => {
+        if (!taskList) return [];
+
+        const pendingTasksList = taskList.filter(task => !task.completed);
+        return array_distinct([
+            ...pendingTasksList.filter(schedule => !schedule.reason),
+            ...pendingTasksList.filter(schedule => (schedule.reason ? true : false)),
+        ]);
+    }
+
+    const completedTasks = () => {
+        if (!taskList) return [];
+        return taskList.filter(task => task.completed);
+    }
+
+    const noTaskFallback = (
+        <Fallback
+            icon={SentimentAatisfiedAltIcon}
+            label="No tasks today!"
+        />
+    )
+
     return (
         <main>
             <AppToolbar
                 isGoBack
                 title="View Schedule"
-                actions={(
+                actions={error === null ? (
                     <React.Fragment>
-                        <IconButton edge="start" onClick={toggleFavStateHandler} color="inherit" aria-label="menu">
+                        <IconButton
+                            edge="start"
+                            onClick={toggleFavStateHandler}
+                            color="inherit"
+                            aria-label="menu"
+                            disabled={loading}
+                        >
                             {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
                         </IconButton>
 
-                        <IconButton aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
+                        <IconButton
+                            aria-controls="simple-menu"
+                            aria-haspopup="true"
+                            onClick={handleClick}
+                            disabled={loading}
+                        >
                             <MoreVentIcon />
                         </IconButton>
                         <Menu
@@ -104,18 +155,25 @@ Activity schedule for ${timestamp}
                             <MenuItem onClick={downloadScheduleHandler}>Download</MenuItem>
                         </Menu>
                     </React.Fragment>
-                )}
+                ) : null}
             />
             <AppContainer>
-                <h1 className="hollow-title">Pending tasks</h1>
-                {taskList && taskList.filter(task => !task.completed).map((task, index) => (
-                    <ScheduleItem key={index} id={task.id} data={task} updateParrent={fetchData} />
-                ))}
-
-                <h1 className="hollow-title">Completed tasks</h1>
-                {taskList && taskList.filter(task => task.completed).map((task, index) => (
-                    <ScheduleItem key={index} id={task.id} data={task} updateParrent={fetchData} />
-                ))}
+                {loading ? <AppSpinner /> : error === null ? taskList && taskList.length > 0 ? (
+                    <React.Fragment>
+                        <IsArrayFilled array={pendingTasks()}>
+                            <h1 className="hollow-title">Pending tasks</h1>
+                            {pendingTasks().map((task, index) => (
+                                <ScheduleItem key={index} id={task.id} data={task} updateParrent={fetchData} />
+                            ))}
+                        </IsArrayFilled>
+                        <IsArrayFilled array={completedTasks()}>
+                            <h1 className="hollow-title">Completed tasks</h1>
+                            {completedTasks().map((task, index) => (
+                                <ScheduleItem key={index} id={task.id} data={task} updateParrent={fetchData} />
+                            ))}
+                        </IsArrayFilled>
+                    </React.Fragment>
+                ) : noTaskFallback : <FailedToFetchFallback onTryAgain={pageInitialLoad} />}
             </AppContainer>
         </main>
     );

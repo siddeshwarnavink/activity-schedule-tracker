@@ -45,9 +45,11 @@ const TaskItem = props => {
                             <ArrowUpwardIcon />
                         </IconButton>
                     ) : null}
-                    <IconButton type="button" onClick={() => props.moveTaskHandler(props.listKey, -1)} aria-controls="simple-menu" aria-haspopup="true">
-                        <ArrowDownwardIcon />
-                    </IconButton>
+                    {!props.isLastItem ? (
+                        <IconButton type="button" onClick={() => props.moveTaskHandler(props.listKey, -1)} aria-controls="simple-menu" aria-haspopup="true">
+                            <ArrowDownwardIcon />
+                        </IconButton>
+                    ) : null}
                     <IconButton type="button" onClick={() => props.addNewTaskBelow(props.listKey)} aria-controls="simple-menu" aria-haspopup="true">
                         <SubdirectoryArrowRightIcon />
                     </IconButton>

@@ -9,6 +9,7 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
 import axios from '../firebase-axios';
+import NotificationContext from '../context/notification-context';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 
@@ -39,6 +40,7 @@ const ScheduleItem = props => {
     // const [checked, setChecked] = React.useState(props.data.completed ? true : false);
     const [reason, setReason] = React.useState(props.data.reason || '');
     const [open, setOpen] = React.useState(false);
+    const notificationCtx = React.useContext(NotificationContext);
 
     const checked = props.data.completed ? true : false;
 
@@ -53,6 +55,7 @@ const ScheduleItem = props => {
     const handleChange = () => {
         axios.patch(`/task?id=${props.id}`, { completed: !checked }).then(() => {
             props.updateParrent();
+            notificationCtx.pushMessage(`Task ${!checked ? 'Completed' : 'not Completed'}`, 'success');
         })
     };
 
@@ -60,6 +63,7 @@ const ScheduleItem = props => {
         handleClose();
         axios.patch(`/task?id=${props.id}`, { reason }).then(() => {
             props.updateParrent();
+            notificationCtx.pushMessage(`Reason updated' : 'not Completed'}`, 'success');
         })
     }
 

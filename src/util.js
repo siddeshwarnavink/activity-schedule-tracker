@@ -12,3 +12,7 @@ export const array_move = (array, fromIndex, toIndex) => {
 
     return updatedArray;
 }
+
+export const array_distinct = array => {
+    return array.filter((value, index, self) => self.indexOf(value) === index);
+}

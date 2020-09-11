@@ -10,6 +10,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import MoreVentIcon from '@material-ui/icons/MoreVert';
 
 import axios from '../firebase-axios';
+import NotificationContext from '../context/notification-context';
 
 const useStyles = makeStyles({
     card: {
@@ -28,6 +29,7 @@ const useStyles = makeStyles({
 const ActivityScheduleItem = props => {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = React.useState(null);
+    const notificationCtx = React.useContext(NotificationContext);
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -39,7 +41,7 @@ const ActivityScheduleItem = props => {
 
     const toggleFavStateHandler = () => {
         axios.patch(`/schedule?id=${props.id}`, { isFavorite: !props.isFavorite }).then(() => {
-            alert('Favorite status updated!');
+            notificationCtx.pushMessage(`Task ${!props.isFavorite ? "favorited" : "unfavorited"}`, 'success');
             props.updateParrent();
             handleClose();
         });
@@ -47,7 +49,7 @@ const ActivityScheduleItem = props => {
 
     const deleteScheduleHandler = () => {
         axios.delete(`/schedule?id=${props.id}`).then(() => {
-            alert('Task deleted!');
+            notificationCtx.pushMessage('Schedule Deleted', 'info');
             props.updateParrent();
             handleClose();
         });
